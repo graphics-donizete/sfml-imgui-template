@@ -1,18 +1,47 @@
-#include <SFML/Window.hpp>
+#include "imgui.h"
+#include "imgui-SFML.h"
+
+#include <SFML/Graphics/CircleShape.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/System/Clock.hpp>
+#include <SFML/Window/Event.hpp>
 
 int main()
 {
-    sf::Window window(sf::VideoMode({800, 600}), "My window");
+    sf::RenderWindow window(sf::VideoMode({640, 480}), "ImGui + SFML = <3");
+    window.setFramerateLimit(30);
+    (void)ImGui::SFML::Init(window);
 
-    // run the program as long as the window is open
+    sf::Clock clock;
+
+    sf::CircleShape shape(100.f);
+    shape.setFillColor(sf::Color::Green);
+
     while (window.isOpen())
     {
-        // check all the window's events that were triggered since the last iteration of the loop
-        while (const std::optional event = window.pollEvent())
+        while (const auto event = window.pollEvent())
         {
-            // "close requested" event: we close the window
+            ImGui::SFML::ProcessEvent(window, *event);
+
             if (event->is<sf::Event::Closed>())
+            {
                 window.close();
+            }
         }
+
+        ImGui::SFML::Update(window, clock.restart());
+
+        ImGui::ShowDemoWindow();
+
+        ImGui::Begin("Hello, world!");
+        ImGui::Button("Look at this pretty button");
+        ImGui::End();
+
+        window.clear();
+        window.draw(shape);
+        ImGui::SFML::Render(window);
+        window.display();
     }
+
+    ImGui::SFML::Shutdown();
 }
